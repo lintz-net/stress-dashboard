@@ -1,0 +1,53 @@
+@if (!hasData) {
+  <div class="charts-empty">
+    <app-empty-state
+      icon="show_chart"
+      title="Sem dados de série temporal"
+      subtitle="Os gráficos aparecerão quando o teste estiver em execução">
+    </app-empty-state>
+  </div>
+} @else {
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Throughput</span>
+        <span class="chart-unit">req/s</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas baseChart
+          [data]="throughputData"
+          [options]="chartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Erros</span>
+        <span class="chart-unit errors">erros/s</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas baseChart
+          [data]="errorsData"
+          [options]="chartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Latência Média</span>
+        <span class="chart-unit latency">ms</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas baseChart
+          [data]="latencyData"
+          [options]="chartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+  </div>
+}

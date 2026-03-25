@@ -1,0 +1,40 @@
+<div class="app-shell">
+  <!-- Top Toolbar -->
+  <mat-toolbar class="app-toolbar">
+    <div class="toolbar-brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-text">
+        <span class="brand-name">Teste de Carga</span>
+      </div>
+    </div>
+
+    <nav class="toolbar-nav">
+      <a mat-button
+        routerLink="/tests"
+        routerLinkActive="nav-active"
+        class="nav-link">
+        <mat-icon>list_alt</mat-icon>
+        Execuções
+      </a>
+      <a mat-button
+        routerLink="/test-wizard"
+        routerLinkActive="nav-active"
+        class="nav-link">
+        <mat-icon>add_circle_outline</mat-icon>
+        Novo Teste
+      </a>
+    </nav>
+
+    <div class="toolbar-end">
+      <div class="api-status mono">
+        <span class="status-dot"></span>
+        localhost:8080
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Main content -->
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

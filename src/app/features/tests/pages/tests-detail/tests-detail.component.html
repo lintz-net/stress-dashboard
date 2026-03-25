@@ -1,0 +1,76 @@
+<div class="page-container">
+  <!-- Toolbar row -->
+  <div class="detail-toolbar">
+    <button mat-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+      Execuções
+    </button>
+
+    <div class="toolbar-actions">
+      @if (isRunning) {
+        <div class="poll-indicator">
+          <span class="poll-dot"></span>
+          <span class="poll-label mono">Atualizando automaticamente</span>
+        </div>
+      }
+
+      <button mat-stroked-button (click)="manualRefresh()" matTooltip="Atualizar agora" class="refresh-btn">
+        <mat-icon>refresh</mat-icon>
+      </button>
+
+      @if (canStart) {
+        <button mat-flat-button color="primary"
+          (click)="startTest()"
+          [disabled]="actionLoading"
+          class="action-btn start-btn">
+          <mat-icon>play_arrow</mat-icon>
+          Iniciar
+        </button>
+      }
+
+      @if (isRunning) {
+        <button mat-flat-button
+          (click)="stopTest()"
+          [disabled]="actionLoading"
+          class="action-btn stop-btn">
+          <mat-icon>stop</mat-icon>
+          Parar
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- States -->
+  @if (loading) {
+    <app-loading></app-loading>
+  } @else if (error) {
+    <div class="error-card">
+      <app-empty-state
+        icon="error_outline"
+        title="Teste não encontrado"
+        subtitle="O testId informado não existe ou houve um erro ao carregar.">
+      </app-empty-state>
+    </div>
+  } @else {
+    <!-- Test Header -->
+    <app-test-header [detail]="detail"></app-test-header>
+
+    <!-- KPIs -->
+    @if (summary) {
+      <div class="section-title">KPIs em Tempo Real</div>
+      <app-kpi-cards [summary]="summary"></app-kpi-cards>
+    } @else {
+      <div class="no-summary-card">
+        <app-empty-state
+          icon="analytics"
+          title="Sem dados de KPI ainda"
+          subtitle="Inicie o teste para ver os indicadores de desempenho">
+        </app-empty-state>
+      </div>
+    }
+
+    <!-- Charts -->
+    <div class="section-title">Série Temporal</div>
+    <app-timeseries-charts [points]="points"></app-timeseries-charts>
+  }
+</div>

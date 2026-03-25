@@ -1,0 +1,387 @@
+<div class="wizard-page">
+  <div class="wizard-header">
+    <h1 class="wizard-title">Criar Teste de Carga</h1>
+    <p class="wizard-subtitle">Configure e inicie um novo teste de carga</p>
+  </div>
+
+  <mat-stepper linear #stepper class="wizard-stepper" labelPosition="bottom">
+
+    <mat-step [stepControl]="stepOneForm" label="Tipo de Teste">
+      <ng-template matStepLabel>
+        <span class="step-label">Tipo de Teste</span>
+        <span class="step-sublabel">Selecione o tipo</span>
+      </ng-template>
+
+      <form [formGroup]="stepOneForm" class="step-form">
+        <div class="step-section-title">Informações do Teste</div>
+        <p class="step-section-sub">Forneça informações básicas sobre seu teste de carga</p>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome do Teste *</mat-label>
+          <input matInput formControlName="name" placeholder="ex: Teste de API de Login de Usuário">
+          @if (stepOneForm.get('name')?.hasError('required')) { <mat-error>Nome é obrigatório</mat-error> }
+          @if (stepOneForm.get('name')?.hasError('minlength')) { <mat-error>Mínimo 3 caracteres</mat-error> }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput formControlName="description" placeholder="Descrição opcional" rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="step-section-title mt-20">Tipo de Teste *</div>
+        <div class="type-cards">
+          @for (t of testTypes; track t.type) {
+            <div class="type-card"
+              [class.selected]="selectedType === t.type"
+              [class.disabled]="!t.available"
+              (click)="selectTestType(t.type, t.available)">
+              <div class="type-icon">{{ t.icon }}</div>
+              <div class="type-label">{{ t.label }}</div>
+              <div class="type-desc">{{ t.description }}</div>
+              @if (!t.available) { <div class="type-unavailable-badge">Em breve</div> }
+            </div>
+          }
+        </div>
+      </form>
+
+      <div class="step-actions">
+        <button mat-stroked-button type="button" (click)="cancel()" class="cancel-btn">Cancelar</button>
+        <button mat-flat-button color="primary" matStepperNext [disabled]="stepOneForm.invalid">Próximo</button>
+      </div>
+    </mat-step>
+
+    <mat-step [stepControl]="stepConfigForm" label="Configuração">
+      <ng-template matStepLabel>
+        <span class="step-label">Configuração</span>
+        <span class="step-sublabel">Parâmetros do teste</span>
+      </ng-template>
+
+      <form [formGroup]="stepConfigForm" class="step-form">
+        @if (isHttpType) {
+          <div class="step-section-title">Configuração HTTP</div>
+          <div class="form-grid-url-method">
+            <mat-form-field appearance="outline">
+              <mat-label>URL de Destino *</mat-label>
+              <input matInput formControlName="url" placeholder="https://api.exemplo.com">
+              @if (stepConfigForm.get('url')?.hasError('required')) { <mat-error>URL é obrigatória</mat-error> }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Método HTTP *</mat-label>
+              <mat-select formControlName="method">
+                @for (m of httpMethods; track m) { <mat-option [value]="m">{{ m }}</mat-option> }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="probe-section">
+            <div class="probe-actions">
+              <button mat-stroked-button color="accent" type="button" (click)="testHttpConfiguration()" [disabled]="probeLoading">
+                <ng-container *ngIf="!probeLoading; else probing">
+                  <mat-icon>travel_explore</mat-icon>
+                  <span>Testar Conexão</span>
+                </ng-container>
+                <ng-template #probing>
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span style="margin-left: 8px;">Testando...</span>
+                </ng-template>
+              </button>
+            </div>
+          </div>
+
+
+          <div class="subsection-header">
+            <span class="subsection-title">Cabeçalhos (Headers)</span>
+            <button mat-stroked-button type="button" (click)="addHeader()" class="add-btn">
+              <mat-icon>add</mat-icon> Adicionar
+            </button>
+          </div>
+
+          <div formArrayName="headers" class="headers-list">
+            @for (h of headers.controls; track $index) {
+              <div [formGroupName]="$index" class="header-row">
+                <mat-form-field appearance="outline"><mat-label>Chave</mat-label><input matInput formControlName="key"></mat-form-field>
+                <mat-form-field appearance="outline"><mat-label>Valor</mat-label><input matInput formControlName="value"></mat-form-field>
+                <button mat-icon-button type="button" (click)="removeHeader($index)" color="warn"><mat-icon>close</mat-icon></button>
+              </div>
+            }
+          </div>
+
+          @if (needsBody) {
+            <mat-form-field appearance="outline" class="full-width mt-12">
+              <mat-label>Body (JSON)</mat-label>
+              <textarea matInput formControlName="body" placeholder='{ "key": "value" }' rows="5" class="mono-textarea"></textarea>
+              <button mat-icon-button matSuffix (click)="beautifyTemplate('body')" type="button" matTooltip="Formatar JSON">
+                <mat-icon>auto_fix_high</mat-icon>
+              </button>
+              <mat-hint ngNonBindable>Use {{variavel}} para valores dinâmicos (ex: {{uuid}}, {{timestamp}}, {{randomInt}}, {{e2id}}, {{todayIsoUtc}})</mat-hint>
+            </mat-form-field>
+
+            <div class="preview-section">
+              <div class="preview-actions">
+                <button mat-stroked-button color="accent" type="button" (click)="validateTemplate()" [disabled]="previewLoading">
+                  <ng-container *ngIf="!previewLoading; else validating">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Validar Template</span>
+                  </ng-container>
+                  <ng-template #validating>
+                    <mat-spinner diameter="20"></mat-spinner>
+                    <span style="margin-left: 8px;">Validando...</span>
+                  </ng-template>
+                </button>
+              </div>
+
+              <div *ngIf="previewError" class="preview-result error">
+                <div class="result-title"><mat-icon>error_outline</mat-icon> Erro na Validação</div>
+                <pre class="result-content">{{ previewError }}</pre>
+              </div>
+
+              <div *ngIf="previewResult" class="preview-result success">
+                <div class="result-title"><mat-icon>check_circle_outline</mat-icon> Template Válido</div>
+                <div class="result-subsection">
+                  <strong>Variáveis Detectadas:</strong>
+                  <pre class="result-content mono">{{ previewResult.variablesDetected | json }}</pre>
+                </div>
+              </div>
+            </div>
+          }
+        }
+
+        @if (isKafkaType) {
+          <div class="step-section-title">Configuração Kafka</div>
+          <p class="step-section-sub">Especifique os detalhes da conexão e da mensagem do Kafka.</p>
+
+          <div class="form-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Tópico *</mat-label>
+              <input matInput formControlName="topic" placeholder="ex: meu-topico-de-teste">
+              @if (stepConfigForm.get('topic')?.hasError('required')) { <mat-error>Tópico é obrigatório</mat-error> }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>ID da Chave Kafka (Opcional)</mat-label>
+              <input matInput formControlName="kafkaKey">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width mt-12">
+            <mat-label>Template de Mensagem</mat-label>
+            <textarea matInput formControlName="kafkaMessageTemplate" rows="4" class="mono-textarea"></textarea>
+            <button mat-icon-button matSuffix (click)="beautifyTemplate('kafkaMessageTemplate')" type="button" matTooltip="Formatar JSON">
+              <mat-icon>auto_fix_high</mat-icon>
+            </button>
+            <mat-hint ngNonBindable>Use {{variavel}} para valores dinâmicos (ex: {{uuid}}, {{timestamp}}, {{randomInt}}, {{e2id}}, {{todayIsoUtc}})</mat-hint>
+          </mat-form-field>
+
+          <div class="preview-section">
+            <div class="preview-actions">
+              <button mat-stroked-button color="accent" type="button" (click)="validateTemplate()" [disabled]="previewLoading">
+                <ng-container *ngIf="!previewLoading; else validating">
+                  <mat-icon>visibility</mat-icon>
+                  <span>Validar Template</span>
+                </ng-container>
+                <ng-template #validating>
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span style="margin-left: 8px;">Validando...</span>
+                </ng-template>
+              </button>
+            </div>
+
+            <div *ngIf="previewError" class="preview-result error">
+              <div class="result-title"><mat-icon>error_outline</mat-icon> Erro na Validação</div>
+              <pre class="result-content">{{ previewError }}</pre>
+            </div>
+
+            <div *ngIf="previewResult" class="preview-result success">
+              <div class="result-title"><mat-icon>check_circle_outline</mat-icon> Template Válido</div>
+              <div class="result-subsection">
+                <strong>Variáveis Detectadas:</strong>
+                <pre class="result-content mono">{{ previewResult.variablesDetected | json }}</pre>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (isMqType) {
+          <div class="step-section-title">Configuração MQ</div>
+          <p class="step-section-sub">Especifique os detalhes da conexão e da mensagem do MQ.</p>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fila *</mat-label>
+            <input matInput formControlName="queueName">
+            @if (stepConfigForm.get('queueName')?.hasError('required')) { <mat-error>Fila é obrigatório</mat-error> }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width mt-16">
+            <mat-label>Template de Mensagem</mat-label>
+            <textarea matInput formControlName="mqMessageTemplate" rows="4" class="mono-textarea"></textarea>
+            <button mat-icon-button matSuffix (click)="beautifyTemplate('mqMessageTemplate')" type="button" matTooltip="Formatar JSON">
+              <mat-icon>auto_fix_high</mat-icon>
+            </button>
+            <mat-hint ngNonBindable>Use {{variavel}} para valores dinâmicos (ex: {{uuid}}, {{timestamp}}, {{randomInt}}, {{e2id}}, {{todayIsoUtc}})</mat-hint>
+          </mat-form-field>
+
+          <div class="preview-section">
+            <div class="preview-actions">
+              <button mat-stroked-button color="accent" type="button" (click)="validateTemplate()" [disabled]="previewLoading">
+                <ng-container *ngIf="!previewLoading; else validating">
+                  <mat-icon>visibility</mat-icon>
+                  <span>Validar Template</span>
+                </ng-container>
+                <ng-template #validating>
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span style="margin-left: 8px;">Validando...</span>
+                </ng-template>
+              </button>
+            </div>
+
+            <div *ngIf="previewError" class="preview-result error">
+              <div class="result-title"><mat-icon>error_outline</mat-icon> Erro na Validação</div>
+              <pre class="result-content">{{ previewError }}</pre>
+            </div>
+
+            <div *ngIf="previewResult" class="preview-result success">
+              <div class="result-title"><mat-icon>check_circle_outline</mat-icon> Template Válido</div>
+              <div class="result-subsection">
+                <strong>Variáveis Detectadas:</strong>
+                <pre class="result-content mono">{{ previewResult.variablesDetected | json }}</pre>
+              </div>
+            </div>
+          </div>
+        }
+      </form>
+
+      <div class="step-actions">
+        <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
+        <button mat-stroked-button matStepperPrevious>Anterior</button>
+        <button mat-flat-button color="primary" matStepperNext [disabled]="stepConfigForm.invalid">Próximo</button>
+      </div>
+    </mat-step>
+
+    <mat-step [stepControl]="stepLoadForm" label="Carga">
+      <ng-template matStepLabel>
+        <span class="step-label">Carga</span>
+        <span class="step-sublabel">Parâmetros de carga</span>
+      </ng-template>
+
+      <form [formGroup]="stepLoadForm" class="step-form">
+        <div class="step-section-title">Definição da Carga</div>
+
+        <div class="form-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Usuários Virtuais (VUs) *</mat-label>
+            <input matInput type="number" formControlName="virtualUsers">
+          </mat-form-field>
+
+          <div>
+            <label class="mat-label">Terminar Teste Por *</label>
+            <mat-radio-group formControlName="loadType" class="radio-group">
+              <mat-radio-button value="duration">Duração</mat-radio-button>
+              <mat-radio-button value="requests">Nº de Requisições</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          @if (stepLoadForm.get('loadType')?.value === 'duration') {
+            <mat-form-field appearance="outline">
+              <mat-label>Duração (s) *</mat-label>
+              <input matInput type="number" formControlName="durationSeconds">
+               @if (stepLoadForm.get('durationSeconds')?.hasError('required')) { <mat-error>Duração é obrigatória</mat-error> }
+            </mat-form-field>
+          }
+          @if (stepLoadForm.get('loadType')?.value === 'requests') {
+            <mat-form-field appearance="outline">
+              <mat-label>Total de Requisições *</mat-label>
+              <input matInput type="number" formControlName="totalRequests">
+              @if (stepLoadForm.get('totalRequests')?.hasError('required')) { <mat-error>Total de requisições é obrigatório</mat-error> }
+            </mat-form-field>
+          }
+        </div>
+
+        <div class="step-section-title mt-20">Configuração de Rampa</div>
+
+        <div class="form-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Ramp Up (s)</mat-label>
+            <input matInput type="number" formControlName="rampUpSeconds">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Ramp Down (s)</mat-label>
+            <input matInput type="number" formControlName="rampDownSeconds">
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width mt-16">
+          <mat-label>Think Time (ms)</mat-label>
+          <input matInput type="number" formControlName="thinkTimeMillis">
+        </mat-form-field>
+
+        <div class="subsection-header mt-20">
+          <span class="subsection-title">Thresholds (SLAs)</span>
+          <button mat-stroked-button type="button" (click)="addThreshold()"><mat-icon>add</mat-icon> Adicionar</button>
+        </div>
+
+        <div formArrayName="thresholds" class="thresholds-list">
+          @for (t of thresholds.controls; track $index) {
+            <div [formGroupName]="$index" class="threshold-row">
+              <mat-form-field appearance="outline"><mat-select formControlName="metric">
+                @for (m of slaMetrics; track m) { <mat-option [value]="m">{{ m }}</mat-option> }
+              </mat-select></mat-form-field>
+              <mat-form-field appearance="outline"><mat-select formControlName="operator">
+                @for (op of slaOperators; track op) { <mat-option [value]="op">{{ op }}</mat-option> }
+              </mat-select></mat-form-field>
+              <mat-form-field appearance="outline"><input matInput type="number" formControlName="value"></mat-form-field>
+              <button mat-icon-button type="button" (click)="removeThreshold($index)" color="warn"><mat-icon>close</mat-icon></button>
+            </div>
+          }
+        </div>
+      </form>
+
+      <div class="step-actions">
+        <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
+        <button mat-stroked-button matStepperPrevious>Anterior</button>
+        <button mat-flat-button color="primary" matStepperNext [disabled]="stepLoadForm.invalid">Próximo</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Revisão">
+      <ng-template matStepLabel>
+        <span class="step-label">Revisão</span>
+        <span class="step-sublabel">Revise e crie</span>
+      </ng-template>
+
+      <div class="step-form review-form">
+        <div class="review-card">
+          <div class="review-card-title">Resumo</div>
+          <div class="review-grid">
+            <div class="review-item">
+              <span class="review-label">NOME</span>
+              <span class="review-value">{{ stepOneForm.get('name')?.value }}</span>
+            </div>
+            <div class="review-item">
+              <span class="review-label">VUs</span>
+              <span class="review-value accent mono">{{ stepLoadForm.get('virtualUsers')?.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ready-banner">
+          <mat-icon class="ready-icon">rocket_launch</mat-icon>
+          <div>
+            <div class="ready-title">Pronto para criar?</div>
+            <div class="ready-sub">O teste poderá ser iniciado imediatamente após a criação.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
+        <button mat-stroked-button matStepperPrevious>Anterior</button>
+        <button mat-flat-button color="primary" (click)="submit()" [disabled]="saving">
+          @if (saving) { <mat-icon class="spin">autorenew</mat-icon> Criando... }
+          @else { <mat-icon>add_circle</mat-icon> Criar Teste }
+        </button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+</div>

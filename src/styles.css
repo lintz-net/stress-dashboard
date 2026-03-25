@@ -1,0 +1,229 @@
+/* =============================================
+   STRESS DASHBOARD — Global Design System
+   Aesthetic: Clean/Minimalist Light
+   Primary font: JetBrains Mono (data/code)
+   Body font: DM Sans (UI labels)
+   ============================================= */
+
+:root {
+  --bg-base:        #f9fafb;
+  --bg-surface:     #ffffff;
+  --bg-card:        #ffffff;
+  --bg-hover:       #f3f4f6;
+  --bg-input:       #ffffff;
+
+  --border-subtle:  #e5e7eb;
+  --border-default: #d1d5db;
+  --border-focus:   #3d8bff;
+
+  --text-primary:   #111827;
+  --text-secondary: #6b7280;
+  --text-muted:     #9ca3af;
+
+  --accent-blue:    #3d8bff;
+  --accent-cyan:    #00d4aa;
+  --accent-green:   #22c55e;
+  --accent-yellow:  #f59e0b;
+  --accent-red:     #ef4444;
+  --accent-purple:  #a78bfa;
+  --accent-orange:  #f97316;
+
+  --status-created:  #6366f1;
+  --status-running:  #22c55e;
+  --status-stopped:  #f59e0b;
+  --status-finished: #3d8bff;
+  --status-error:    #ef4444;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.05), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 4px 12px rgba(0,0,0,0.08), 0 0 0 1px var(--border-subtle);
+
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-ui:   'DM Sans', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Angular Material overrides ---- */
+.mat-mdc-card {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.mat-toolbar {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-text-field-wrapper {
+  background: var(--bg-input) !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: var(--border-default) !important;
+}
+
+.mdc-text-field--focused .mdc-notched-outline__leading,
+.mdc-text-field--focused .mdc-notched-outline__notch,
+.mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: var(--accent-blue) !important;
+}
+
+.mat-mdc-input-element,
+.mat-mdc-select-value-text,
+.mat-mdc-select-placeholder {
+  color: var(--text-primary) !important;
+  font-family: var(--font-ui) !important;
+}
+
+.mat-mdc-form-field-label,
+.mat-mdc-floating-label {
+  color: var(--text-secondary) !important;
+}
+
+.mat-mdc-option {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.mat-mdc-option:hover {
+  background: var(--bg-hover) !important;
+}
+
+.mat-mdc-select-panel {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-default) !important;
+}
+
+.mat-mdc-table {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+.mat-mdc-header-row {
+  background: var(--bg-hover) !important;
+}
+
+.mat-mdc-header-cell {
+  color: var(--text-secondary) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.mat-mdc-row {
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  transition: background 0.15s ease;
+}
+
+.mat-mdc-row:hover {
+  background: var(--bg-hover) !important;
+}
+
+.mat-mdc-cell {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--bg-card) !important;
+  --mdc-snackbar-supporting-text-color: var(--text-primary) !important;
+  border: 1px solid var(--border-default) !important;
+}
+
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: var(--bg-card) !important;
+}
+
+.mat-mdc-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--accent-blue);
+  --mdc-filled-button-label-text-color: #fff;
+}
+
+.mat-step-header .mat-step-icon-selected,
+.mat-step-header .mat-step-icon-state-done,
+.mat-step-header .mat-step-icon-state-edit {
+  background-color: var(--accent-blue) !important;
+}
+
+.mat-stepper-horizontal {
+  background: transparent !important;
+}
+
+.mat-step-header:hover {
+  background: var(--bg-hover) !important;
+}
+
+.mat-step-label {
+  color: var(--text-secondary) !important;
+}
+
+.mat-step-label-selected {
+  color: var(--text-primary) !important;
+}
+
+/* ---- Utilities ---- */
+.mono {
+  font-family: var(--font-mono);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

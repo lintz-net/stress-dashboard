@@ -1,0 +1,22 @@
+<div class="kpi-grid">
+  @for (card of cards; track card.label) {
+    <div class="kpi-card" [style.--accent]="card.accentColor">
+      <div class="kpi-header">
+        <span class="kpi-label">{{ card.label }}</span>
+        <div class="kpi-icon">
+          <mat-icon>{{ card.icon }}</mat-icon>
+        </div>
+      </div>
+      @if (card.isStatus && card.status) {
+        <div class="kpi-status-wrap">
+          <app-status-badge [status]="card.status"></app-status-badge>
+        </div>
+      } @else {
+        <div class="kpi-value mono">{{ card.value }}</div>
+        @if (card.sublabel) {
+          <div class="kpi-sublabel">{{ card.sublabel }}</div>
+        }
+      }
+    </div>
+  }
+</div>

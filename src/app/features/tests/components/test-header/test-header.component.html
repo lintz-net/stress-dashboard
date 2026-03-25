@@ -1,0 +1,58 @@
+@if (detail) {
+  <div class="header-card">
+    <div class="header-main">
+      <div class="header-name-row">
+        <h1 class="test-name">{{ detail.name }}</h1>
+        <app-status-badge [status]="detail.status"></app-status-badge>
+      </div>
+      <p class="test-id mono text-muted">ID: {{ detail.testId }}</p>
+    </div>
+
+    <div class="header-meta">
+      <div class="meta-item">
+        <mat-icon class="meta-icon">link</mat-icon>
+        <div class="meta-content">
+          <span class="meta-label">Endpoint</span>
+          <span class="meta-value mono">
+            <span class="method-badge" [class]="'method-' + detail.method.toLowerCase()">{{ detail.method }}</span>
+            {{ detail.url }}
+          </span>
+        </div>
+      </div>
+
+      <div class="meta-item">
+        <mat-icon class="meta-icon">people</mat-icon>
+        <div class="meta-content">
+          <span class="meta-label">Usuários Virtuais</span>
+          <span class="meta-value mono accent">{{ detail.virtualUsers }} VUs</span>
+        </div>
+      </div>
+
+      @if (detail.terminationMode === 'TIME') {
+        <div class="meta-item">
+          <mat-icon class="meta-icon">timer</mat-icon>
+          <div class="meta-content">
+            <span class="meta-label">Duração</span>
+            <span class="meta-value mono">{{ formatDuration(detail.durationSeconds) }}</span>
+          </div>
+        </div>
+      } @else {
+        <div class="meta-item">
+          <mat-icon class="meta-icon">pin</mat-icon>
+          <div class="meta-content">
+            <span class="meta-label">Requisições</span>
+            <span class="meta-value mono">{{ formatNumber(detail.totalRequests) }}</span>
+          </div>
+        </div>
+      }
+
+      <div class="meta-item">
+        <mat-icon class="meta-icon">trending_up</mat-icon>
+        <div class="meta-content">
+          <span class="meta-label">Ramp-up</span>
+          <span class="meta-value mono">{{ formatDuration(detail.rampUpSeconds) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}
