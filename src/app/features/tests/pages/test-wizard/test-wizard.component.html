@@ -73,8 +73,15 @@
             </mat-form-field>
           </div>
 
-          
-
+          <div style="margin-bottom: 20px;">
+            <button mat-stroked-button color="primary" type="button" (click)="testHttpConfiguration()" [disabled]="probeLoading || !stepConfigForm.get('url')?.value">
+              @if (probeLoading) {
+                <mat-spinner diameter="18" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-spinner> Testando...
+              } @else {
+                <mat-icon>network_check</mat-icon> Testar Conexão
+              }
+            </button>
+          </div>
 
           <div class="subsection-header">
             <span class="subsection-title">Cabeçalhos (Headers)</span>
