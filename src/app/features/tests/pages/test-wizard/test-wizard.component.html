@@ -13,8 +13,18 @@
       </ng-template>
 
       <form [formGroup]="stepOneForm" class="step-form">
-        <div class="step-section-title">Informações do Teste</div>
-        <p class="step-section-sub">Forneça informações básicas sobre seu teste de carga</p>
+        <div class="step-header-row">
+          <div class="step-header-text">
+            <div class="step-section-title">Informações do Teste</div>
+            <p class="step-section-sub">Forneça informações básicas sobre seu teste de carga</p>
+          </div>
+          <div>
+            <input type="file" #fileInput (change)="importConfig($event)" accept=".json" style="display: none;">
+            <button mat-stroked-button type="button" (click)="triggerImport(fileInput)">
+              <mat-icon>upload_file</mat-icon> Importar
+            </button>
+          </div>
+        </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nome do Teste *</mat-label>
@@ -447,6 +457,9 @@
       <div class="step-actions">
         <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
         <button mat-stroked-button matStepperPrevious>Anterior</button>
+        <button mat-stroked-button type="button" (click)="exportConfig()">
+          <mat-icon>save_alt</mat-icon> Salvar Configuração
+        </button>
         <button mat-flat-button color="primary" (click)="submit()" [disabled]="saving">
           @if (saving) { <mat-icon class="spin">autorenew</mat-icon> Criando... }
           @else { <mat-icon>add_circle</mat-icon> Criar Teste }

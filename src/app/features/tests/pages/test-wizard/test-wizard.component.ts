@@ -302,6 +302,91 @@ export class TestWizardComponent implements OnInit {
     });
   }
 
+  triggerImport(fileInput: HTMLInputElement): void {
+    fileInput.click();
+  }
+
+  importConfig(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const config = JSON.parse(content);
+
+        if (!config.stepOne || !config.stepConfig || !config.stepLoad) {
+          throw new Error('Formato de arquivo inválido.');
+        }
+
+        // Preenche Step 1
+        this.stepOneForm.patchValue(config.stepOne);
+        this.updateConfigValidators(config.stepOne.testType);
+
+        // Reconstrói Headers e Preenche Step 2
+        this.headers.clear();
+        if (config.stepConfig.headers && Array.isArray(config.stepConfig.headers)) {
+          config.stepConfig.headers.forEach((h: any) => {
+            this.headers.push(this.fb.group({ key: [h.key, Validators.required], value: [h.value] }));
+          });
+        }
+        this.stepConfigForm.patchValue(config.stepConfig);
+
+        // Reconstrói SLAs e Preenche Step 3
+        this.thresholds.clear();
+        if (config.stepLoad.thresholds && Array.isArray(config.stepLoad.thresholds)) {
+          config.stepLoad.thresholds.forEach((t: any) => {
+            this.thresholds.push(this.fb.group({
+              metric: [t.metric, Validators.required],
+              operator: [t.operator, Validators.required],
+              value: [t.value, [Validators.required, Validators.min(0)]]
+            }));
+          });
+        }
+        // Força setar o tipo primeiro para evitar limpar campos via valueChanges, depois preenche
+        this.stepLoadForm.get('loadType')?.setValue(config.stepLoad.loadType);
+        this.stepLoadForm.patchValue(config.stepLoad);
+
+        this.snackBar.open('Configuração importada com sucesso!', 'Fechar', { duration: 3000 });
+      } catch (error) {
+        this.snackBar.open('Erro ao importar arquivo. Verifique se o formato é válido.', 'Fechar', { duration: 4000, panelClass: 'error-snackbar' });
+      } finally {
+        input.value = ''; // Permite importar o mesmo arquivo novamente
+      }
+    };
+
+    reader.onerror = () => {
+      this.snackBar.open('Erro na leitura do arquivo.', 'Fechar', { duration: 3000, panelClass: 'error-snackbar' });
+      input.value = '';
+    };
+
+    reader.readAsText(file);
+  }
+
+  exportConfig(): void {
+    try {
+      const config = {
+        stepOne: this.stepOneForm.getRawValue(),
+        stepConfig: this.stepConfigForm.getRawValue(),
+        stepLoad: this.stepLoadForm.getRawValue()
+      };
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `teste-${config.stepOne.name?.replace(/\s+/g, '-').toLowerCase() || 'config'}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      this.snackBar.open('Configuração salva com sucesso!', 'Fechar', { duration: 3000 });
+    } catch (e) {
+      this.snackBar.open('Erro ao salvar configuração.', 'Fechar', { duration: 3000, panelClass: 'error-snackbar' });
+    }
+  }
+
   cancel(): void { this.router.navigate(['/tests']); }
 
   submit(): void {
