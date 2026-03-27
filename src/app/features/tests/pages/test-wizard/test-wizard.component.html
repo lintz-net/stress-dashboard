@@ -73,20 +73,7 @@
             </mat-form-field>
           </div>
 
-          <div class="probe-section">
-            <div class="probe-actions">
-              <button mat-stroked-button color="accent" type="button" (click)="testHttpConfiguration()" [disabled]="probeLoading">
-                <ng-container *ngIf="!probeLoading; else probing">
-                  <mat-icon>travel_explore</mat-icon>
-                  <span>Testar Conexão</span>
-                </ng-container>
-                <ng-template #probing>
-                  <mat-spinner diameter="20"></mat-spinner>
-                  <span style="margin-left: 8px;">Testando...</span>
-                </ng-template>
-              </button>
-            </div>
-          </div>
+          
 
 
           <div class="subsection-header">
@@ -352,17 +339,93 @@
 
       <div class="step-form review-form">
         <div class="review-card">
-          <div class="review-card-title">Resumo</div>
+          <div class="review-card-title">Resumo do Teste</div>
+
+          <!-- Informações Gerais -->
           <div class="review-grid">
             <div class="review-item">
               <span class="review-label">NOME</span>
               <span class="review-value">{{ stepOneForm.get('name')?.value }}</span>
             </div>
             <div class="review-item">
-              <span class="review-label">VUs</span>
-              <span class="review-value accent mono">{{ stepLoadForm.get('virtualUsers')?.value }}</span>
+              <span class="review-label">TIPO</span>
+              <span class="review-value">{{ testTypeLabel }}</span>
             </div>
           </div>
+          <div class="review-item" style="margin-top: 12px;">
+            <span class="review-label">DESCRIÇÃO</span>
+            <span class="review-value">{{ stepOneForm.get('description')?.value || '-' }}</span>
+          </div>
+
+          <!-- Configuração do Alvo -->
+          <div class="review-card-subtitle">Alvo</div>
+          <div class="review-grid">
+            <div class="review-item">
+              <span class="review-label">ENDPOINT</span>
+              <span class="review-value mono">{{ targetEndpoint }}</span>
+            </div>
+            @if (isHttpType) {
+              <div class="review-item">
+                <span class="review-label">MÉTODO</span>
+                <span class="review-value mono">{{ stepConfigForm.get('method')?.value }}</span>
+              </div>
+            }
+            @if (isKafkaType) {
+               <div class="review-item">
+                <span class="review-label">CHAVE</span>
+                <span class="review-value mono">{{ stepConfigForm.get('kafkaKey')?.value || 'N/A' }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Configuração de Carga -->
+          <div class="review-card-subtitle">Configuração de Carga</div>
+          <div class="review-grid">
+            <div class="review-item">
+              <span class="review-label">USUÁRIOS VIRTUAIS (VUs)</span>
+              <span class="review-value accent mono">{{ stepLoadForm.get('virtualUsers')?.value }}</span>
+            </div>
+
+            @if(stepLoadForm.get('loadType')?.value === 'duration') {
+              <div class="review-item">
+                <span class="review-label">DURAÇÃO</span>
+                <span class="review-value mono">{{ stepLoadForm.get('durationSeconds')?.value }}s</span>
+              </div>
+            } @else {
+              <div class="review-item">
+                <span class="review-label">TOTAL DE REQUISIÇÕES</span>
+                <span class="review-value mono">{{ stepLoadForm.get('totalRequests')?.value }}</span>
+              </div>
+            }
+            <div class="review-item">
+              <span class="review-label">RAMP UP</span>
+              <span class="review-value mono">{{ stepLoadForm.get('rampUpSeconds')?.value }}s</span>
+            </div>
+            <div class="review-item">
+              <span class="review-label">RAMP DOWN</span>
+              <span class="review-value mono">{{ stepLoadForm.get('rampDownSeconds')?.value }}s</span>
+            </div>
+             <div class="review-item">
+              <span class="review-label">THINK TIME</span>
+              <span class="review-value mono">{{ stepLoadForm.get('thinkTimeMillis')?.value }}ms</span>
+            </div>
+             <div class="review-item">
+              <span class="review-label">DURAÇÃO TOTAL ESTIMADA</span>
+              <span class="review-value mono">{{ formatDuration(estimatedTotalSeconds) }}</span>
+            </div>
+          </div>
+
+          @if (thresholds.length > 0) {
+            <div class="review-card-subtitle" style="margin-top: 16px;">Thresholds (SLAs)</div>
+            <div class="review-grid">
+              @for (t of thresholds.controls; track $index) {
+                <div class="review-item">
+                  <span class="review-label">MÉTRICA</span>
+                  <span class="review-value mono">{{ t.get('metric')?.value }} {{ t.get('operator')?.value }} {{ t.get('value')?.value }}</span>
+                </div>
+              }
+            </div>
+          }
         </div>
 
         <div class="ready-banner">

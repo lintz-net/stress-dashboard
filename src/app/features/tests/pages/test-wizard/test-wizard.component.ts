@@ -91,6 +91,19 @@ export class TestWizardComponent implements OnInit {
     return Number(ru) + Number(rd);
   }
 
+  get targetEndpoint(): string {
+    if (this.isHttpType) return this.stepConfigForm.get('url')?.value || '-';
+    if (this.isKafkaType) return this.stepConfigForm.get('topic')?.value || '-';
+    if (this.isMqType) return this.stepConfigForm.get('queueName')?.value || '-';
+    return '-';
+  }
+
+  get testTypeLabel(): string {
+    const type = this.selectedType;
+    const found = this.testTypes.find(t => t.type === type);
+    return found ? found.label : String(type);
+  }
+
   ngOnInit(): void {
     this.stepOneForm = this.fb.group({
       name:        ['', [Validators.required, Validators.minLength(3)]],
