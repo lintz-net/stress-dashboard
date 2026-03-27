@@ -9,16 +9,38 @@
     </div>
 
     <div class="header-meta">
-      <div class="meta-item">
-        <mat-icon class="meta-icon">link</mat-icon>
-        <div class="meta-content">
-          <span class="meta-label">Endpoint</span>
-          <span class="meta-value mono">
-            <span class="method-badge" [class]="'method-' + detail.method.toLowerCase()">{{ detail.method }}</span>
-            {{ detail.url }}
-          </span>
-        </div>
-      </div>
+      @switch (detail.testType) {
+        @case ('HTTP') {
+          <div class="meta-item">
+            <mat-icon class="meta-icon">link</mat-icon>
+            <div class="meta-content">
+              <span class="meta-label">Endpoint</span>
+              <span class="meta-value mono">
+                <span class="method-badge" [class]="'method-' + (detail.method ?? 'get').toLowerCase()">{{ detail.method }}</span>
+                {{ detail.url }}
+              </span>
+            </div>
+          </div>
+        }
+        @case ('KAFKA') {
+          <div class="meta-item">
+            <mat-icon class="meta-icon">hub</mat-icon>
+            <div class="meta-content">
+              <span class="meta-label">Tópico</span>
+              <span class="meta-value mono">{{ detail.topic }}</span>
+            </div>
+          </div>
+        }
+        @case ('MQ') {
+          <div class="meta-item">
+            <mat-icon class="meta-icon">queue</mat-icon>
+            <div class="meta-content">
+              <span class="meta-label">Fila</span>
+              <span class="meta-value mono">{{ detail.queueName }}</span>
+            </div>
+          </div>
+        }
+      }
 
       <div class="meta-item">
         <mat-icon class="meta-icon">people</mat-icon>

@@ -14,7 +14,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import { TimeseriesPoint } from '../../../../core/api/models';
+import { TimeseriesPoint, TestType } from '../../../../core/api/models';
 import { formatEpochToTime } from '../../../../shared/utils/formatters';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
@@ -39,9 +39,11 @@ Chart.register(
 })
 export class TimeseriesChartsComponent implements OnChanges {
   @Input() points: TimeseriesPoint[] = [];
+  @Input() testType: TestType = 'HTTP';
 
   labels: string[] = [];
   hasData = false;
+  throughputUnit = 'req/s';
 
   throughputData: ChartData<'line'> = { labels: [], datasets: [] };
   errorsData: ChartData<'line'> = { labels: [], datasets: [] };
@@ -89,7 +91,7 @@ export class TimeseriesChartsComponent implements OnChanges {
   };
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['points']) {
+    if (changes['points'] || changes['testType']) {
       this.buildCharts();
     }
   }
@@ -101,6 +103,7 @@ export class TimeseriesChartsComponent implements OnChanges {
     }
     this.hasData = true;
 
+    this.throughputUnit = this.testType === 'HTTP' ? 'req/s' : 'msg/s';
     this.labels = this.points.map(p => formatEpochToTime(p.epochSecond));
 
     this.throughputData = {
@@ -114,7 +117,7 @@ export class TimeseriesChartsComponent implements OnChanges {
         pointHoverRadius: 4,
         tension: 0.3,
         fill: true,
-        label: 'req/s'
+        label: this.throughputUnit
       }]
     };
 

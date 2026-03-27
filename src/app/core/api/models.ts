@@ -72,17 +72,22 @@ export interface TestDetail {
   testId: string;
   name: string;
   status: TestStatus;
+  testType: TestType;
   createdAt: number;
   startedAt: number;
   endedAt: number;
   virtualUsers: number;
   rampUpSeconds: number;
   thinkTimeMillis: number;
-  url: string;
-  method: HttpMethod;
   terminationMode: 'TIME' | 'REQUESTS';
-  durationSeconds: number;
-  totalRequests: number;
+  durationSeconds?: number;
+  totalRequests?: number;
+
+  // Target config
+  url?: string;
+  method?: HttpMethod;
+  topic?: string;
+  queueName?: string;
 }
 
 // --- Summary (KPIs) ---
